@@ -31,7 +31,7 @@ public class PhyUGen extends UGen
   PhysicalModel mdl;
 
   // strat with ony one constructor for the function.
-  public PhyUGen(int sampleRate, double spacing)
+  public PhyUGen(int sampleRate, phyGenome genome, double offsX, double offsY)
   {
     super();
 
@@ -40,9 +40,9 @@ public class PhyUGen extends UGen
     mdl.setFriction(fric);
 
     gridSpacing = (int)((height/dimX)*2);
-    generateMesh(mdl, dimX, dimY, "osc", "spring", 1., spacing, 0.006, 0.00001, 0.09, 0.0001);
+    generateMesh2(mdl, offsX, offsY, genome, "osc", "spring");
 
-    listeningPoint = "osc5_5";
+    listeningPoint = "mass_5";
 
     this.mdl.init();
   }
@@ -61,16 +61,15 @@ public class PhyUGen extends UGen
   {
     float sample;
     synchronized(lock) {
-    this.mdl.computeStep();
-
-    // calculate the sample value
-    if(simUGen.mdl.matExists(listeningPoint))
-      sample =(float)(this.mdl.getMatPosition(listeningPoint).z * 0.01);
-    else
-      sample = 0;
+      this.mdl.computeStep();
+  
+      // calculate the sample value
+      if(this.mdl.matExists(listeningPoint)) {
+        sample =(float)(this.mdl.getMatPosition(listeningPoint).z * 0.01);
+      } else {
+        sample = 0;
+      }
+      Arrays.fill(channels, sample);
     }
-    //this.mdl.updatePosSpeedArraysForModType(modelPos, modelVel, matModuleType.Mass3D);
-    Arrays.fill( channels, sample );
-    
   }
 }

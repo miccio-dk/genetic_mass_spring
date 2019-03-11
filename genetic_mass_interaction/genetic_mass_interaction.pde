@@ -8,8 +8,10 @@ int displayRate = 60;
 int mouseDragged = 0;
 
 int gridSpacing = 2;
-int xOffset= 0;
-int yOffset= 0;
+float spacing = 15;
+
+int xOffset= 50;
+int yOffset= 50;
 
 private Object lock = new Object();
 
@@ -19,17 +21,20 @@ PeasyCam cam;
 float percsize = 200;
 
 Minim minim;
-PhyUGen simUGen;
-Gain gain;
 
+int NUM_SPECIMEN = 8;
+phyGenome[] genome = new phyGenome[NUM_SPECIMEN];
+PhyUGen[] simUGen = new PhyUGen[NUM_SPECIMEN];
+Gain[] gain = new Gain[NUM_SPECIMEN];
+
+Summer sum;
 AudioOutput out;
-AudioRecorder recorder;
-
-
-float gainVal = 1.;
 
 float speed = 0;
 float pos = 100;
+
+String lastExctNode;
+String lastExctModel;
 
 
 ///////////////////////////////////////
@@ -38,7 +43,7 @@ void setup()
 {
   //size(1000, 700, P3D);
   fullScreen(P3D,2);
-    cam = new PeasyCam(this, 100);
+  cam = new PeasyCam(this, 100);
   cam.setMinimumDistance(50);
   cam.setMaximumDistance(2500);
   
@@ -47,15 +52,18 @@ void setup()
   // use the getLineOut method of the Minim object to get an AudioOutput object
   out = minim.getLineOut();
   
-  recorder = minim.createRecorder(out, "myrecording.wav");
-  
+  sum = new Summer();
+  for(int i=0; i<NUM_SPECIMEN; i++) {
     // start the Gain at 0 dB, which means no change in amplitude
-  gain = new Gain(0);
-  
-  // create a physicalModel UGEN
-  simUGen = new PhyUGen(44100);
-  // patch the Oscil to the output
-  simUGen.patch(gain).patch(out);
+    gain[i] = new Gain(0);
+    // create a physicalModel UGEN
+    genome[i] = new phyGenome();
+    genome[i].randomize();
+    simUGen[i] = new PhyUGen(44100, genome[i], 0, 100*i);
+    // patch the Oscil to the output
+    simUGen[i].patch(gain[i]).patch(sum);
+  }
+  sum.patch(out);
   
   //simUGen.mdl.triggerForceImpulse("mass"+(excitationPoint), 0, 1, 0);
   cam.setDistance(500);  // distance from looked-at point
@@ -72,57 +80,35 @@ void draw()
 
   pushMatrix();
   translate(xOffset,yOffset, 0.);
-  renderLinks(simUGen.mdl);
+  for(int i=0; i<NUM_SPECIMEN; i++) {
+    renderLinks(simUGen[i].mdl);
+  }
   popMatrix();
 
   fill(255);
   textSize(13); 
 
-  text("Friction: " + fric, 50, 50, 50);
-  text("Zoom: " + zZoom, 50, 100, 50);
+  text("Friction: " + fric, 100, 100, 50);
+  text("Zoom: " + zZoom, 100, 120, 50);
+  text("Last Exct: " + lastExctModel + "." + lastExctNode, 100, 140, 50);
 
   
   if (mouseDragged == 1){
-    if((mouseX) < (dimX*gridSpacing+xOffset) & (mouseY) < (dimY*gridSpacing+yOffset) & mouseX>xOffset & mouseY > yOffset){ // Garde fou pour ne pas sortir des limites du pinScreen
-      println(mouseX, mouseY);
-      if(mouseButton == LEFT)
-        engrave(mouseX-xOffset, mouseY - yOffset);
-      if(mouseButton == RIGHT)
-        chisel(mouseX-xOffset, mouseY - yOffset);
-    }
+    println(mouseX, mouseY);
+    if(mouseButton == LEFT)
+      engrave(mouseX, mouseY);
   }
-  
-  if ( recorder.isRecording() )
-  {
-    text("Currently recording...", 5, 15);
-  }
-  else
-  {
-    text("Not recording.", 5, 15);
-  }
-
 }
 
-
-
-void fExt(){
-  String matName = "osc" + floor(random(dimX))+"_"+ floor(random(dimY));
-  simUGen.mdl.triggerForceImpulse(matName, random(100) , random(100), random(500));
-}
 
 void engrave(float mX, float mY){
-  String matName = "osc" + floor(mX/ gridSpacing)+"_"+floor(mY/ gridSpacing);
-  println(simUGen.mdl.matExists(matName));
-  if(simUGen.mdl.matExists(matName))
-    simUGen.mdl.triggerForceImpulse(matName, 0. , 0., 15.);
-}
-
-void chisel(float mX, float mY){
-  String matName = "osc" + floor(mX/ gridSpacing)+"_"+floor(mY/ gridSpacing);
-  println(simUGen.mdl.matExists(matName));
-  synchronized(lock){
-  if(simUGen.mdl.matExists(matName))
-    simUGen.mdl.removeMatAndConnectedLinks(matName);
+  String matName = "mass_" + int(mX / (width/30));
+  int index = int((mY) / (height / (NUM_SPECIMEN-1)));
+  println("exciting " + index + "." + matName);
+  if(simUGen[index].mdl.matExists(matName)) {
+    lastExctModel = "" + index;
+    lastExctNode = matName;
+    simUGen[index].mdl.triggerForceImpulse(matName, 0. , 0., 15.);
   }
 }
 
@@ -139,31 +125,40 @@ void mouseReleased() {
 
 
 void keyPressed() {
-  if (key == ' ')
-  simUGen.mdl.setGravity(-0.001);
-  if(keyCode == UP){
-    fric += 0.001;
-    synchronized(lock){
-      simUGen.mdl.setFriction(0.);
+  if (key == ' ') {
+    for(int i=0; i<NUM_SPECIMEN; i++) {
+      simUGen[i].mdl.setGravity(-0.001);
+    }
+  }
+  if(keyCode == UP) {
+    fric += 0.00005;
+    synchronized(lock) {
+      for(int i=0; i<NUM_SPECIMEN; i++) {
+        simUGen[i].mdl.setFriction(fric);
+      }
     }
     println(fric);
-
   }
   else if (keyCode == DOWN){
-    fric -= 0.001;
+    fric -= 0.00005;
     fric = max(fric, 0);
-    simUGen.mdl.setFriction(fric);
+    for(int i=0; i<NUM_SPECIMEN; i++) {
+      simUGen[i].mdl.setFriction(fric);
+    }
     println(fric);
   }
   else if (keyCode == LEFT){
-    zZoom ++;
+    zZoom += 0.1;
   }
   else if (keyCode == RIGHT){
-    zZoom --;
+    zZoom -= 0.1;
   }
 }
 
 void keyReleased() {
-  if (key == ' ')
-  simUGen.mdl.setGravity(0.000);
+  if (key == ' ') {
+    for(int i=0; i<NUM_SPECIMEN; i++) {
+      simUGen[i].mdl.setGravity(0.000);
+    }
+  }
 }
