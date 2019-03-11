@@ -8,12 +8,24 @@ This project allows the _evolution_ of a mass-spring physical model based on use
 ### Setup
 - Download and install **Processing**
 - Install [miPhysics_Processing](https://github.com/mi-creative/miPhysics_Processing) and relative dependencies
-- Open the `genetic_mass_interaction` sketch and run
+- Open the `genetic_mass_interaction` sketch
 ### Usage
-- TODO
+- Hover a specimen to hear it being played (horizontal offset determines point of excitation)
+- Click on a specimen to generate a new population based on it 
+- Rinse and repeat!
+- The following hyperparameters can be adjusted from the main file:
+  - `NUM_SPECIMEN`: population size
+  - `genome[i].evolve(a, x, c)`: `a` is the probability of controlled mutation, `b` is the probability of completely random mutatiom/gene replacement, `c` is the mutation amount
+
+
+## Known limitation
+Depending on how the model parameters mutate:
+- Output might become unstable and clip 
+- Models might be pushed out of the screen or overlap
 
 ## TODO
-- implement cost function
-- implement selection, crossover, mutation, etc
-- wrap into simulation
+- implement alternative cost function
+- implement crossover
 - write report
+- better visualization (show masses)
+- keep parameter stable

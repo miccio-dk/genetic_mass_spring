@@ -24,9 +24,10 @@ public class PhyUGen extends UGen
   
   private String listeningPoint;
 
-  private float    oneOverSampleRate;
-  public ArrayList <PVector> modelPos;
-  public ArrayList <PVector> modelVel;
+  private float oneOverSampleRate;
+  public int center_x;
+  public int center_y;
+  public phyGenome genome;
 
   PhysicalModel mdl;
 
@@ -34,12 +35,15 @@ public class PhyUGen extends UGen
   public PhyUGen(int sampleRate, phyGenome genome, double offsX, double offsY)
   {
     super();
-
+    // TODO use findCenter
+    this.center_x = (int)offsX;
+    this.center_y = (int)offsY;
+    this.genome = genome;
+    
     this.mdl = new PhysicalModel(sampleRate, displayRate);
     mdl.setGravity(0.000);
     mdl.setFriction(fric);
 
-    gridSpacing = (int)((height/dimX)*2);
     generateMesh2(mdl, offsX, offsY, genome, "osc", "spring");
 
     listeningPoint = "mass_5";

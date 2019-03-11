@@ -17,24 +17,44 @@ public class phyGenome
     }
   }
   
-  public void evolve(float mutationProb, float mutationAmount)
+  public PVector findCenter()
   {
-    
+    // TODO!
+    PVector center = new PVector(0, 0);
+    return center;
   }
   
-  public void mutate(float mutationAmount)
+  // choose which genes will be mutated based on mutationProb
+  public void mutate(float mutationProb, float mutationAmount)
   {
-    
+    Random rand = new Random();
+    for (int i = 0; i < MAX_NODES; i++) {
+      if(rand.nextFloat() > 1-mutationProb)
+        genes.get(i).mutate(mutationAmount);
+    }
   }
-  
+
+  // like mutate(), but with completely random gene prob
+  public void evolve(float mutationProb, float randomizeProb, float mutationAmount)
+  {
+    Random rand = new Random();
+    for (int i = 0; i < MAX_NODES; i++) {
+      if(rand.nextFloat() > 1-mutationProb)
+        genes.get(i).mutate(mutationAmount);
+      if(rand.nextFloat() > 1-randomizeProb)
+        genes.get(i).randomize();
+    }
+  }
+
+  //
   public void randomize()
   {
     Random rand = new Random();
     boolean firstElem = true;
     int j = 0;
     for (phyGene gene : this.genes) {
-      gene.posX = rand.nextInt(300);
-      gene.posY = rand.nextInt(100);
+      gene.posX = rand.nextInt(300) - 150;
+      gene.posY = rand.nextInt(100) - 50;
       gene.masValue = firstElem ? 5000 : (1 + rand.nextFloat() * 10);
       gene.K_osc = 0.006 + rand.nextFloat() * 0.0006;
       gene.Z_osc = 0.00001 + rand.nextFloat() * 0.000001;
