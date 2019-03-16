@@ -9,13 +9,13 @@ public class phyGene
   public double K_osc, Z_osc;
   public double K, Z;
   public ArrayList<String> conn;  
-  
+
   public phyGene(String name, int conns)
   {
     this.name = name;
     this.conn = new ArrayList<String>();
   }
-  
+
   public phyGene(phyGene a)
   {
     this.name = a.name;
@@ -26,11 +26,11 @@ public class phyGene
     this.K = a.K;
     this.Z = a.Z;
     this.conn = new ArrayList<String>();
-    for(String node : a.conn) {
+    for (String node : a.conn) {
       this.conn.add(node);
     }
   }
-  
+
   public void mutate(float mutationAmount)
   {
     posX = (int)randomizeValue(posX, mutationAmount);
@@ -43,7 +43,7 @@ public class phyGene
     Z = randomizeValue(Z, mutationAmount);
     // TODO mutate connections!
   }
-  
+
   public void randomize()
   {
     Random rand = new Random();
@@ -56,7 +56,7 @@ public class phyGene
     Z = 0.0001 + rand.nextFloat() * 0.00001;
     // TODO randomize connections!
   }
-  
+
   // mutate a gene: randomly add or substract up to mutationAmount percent to each param
   private double randomizeValue(double value, float mutationAmount)
   {
@@ -67,6 +67,4 @@ public class phyGene
     //println("Mutation amount: " + v);
     return value + (value*v);
   }
-  
-  
 }

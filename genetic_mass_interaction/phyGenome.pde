@@ -1,4 +1,4 @@
-import java.util.Arrays;
+import java.util.Arrays; //<>//
 import java.util.Random;
 
 
@@ -20,28 +20,28 @@ public class phyGenome
       genes.add(new phyGene("mass_"+i, MAX_CONNS));
     }
   }
-  
+
   public phyGenome(phyGenome a)
   {
     genes = new ArrayList<phyGene>(MAX_NODES);
-    for (phyGene gene : a.genes) { //<>//
+    for (phyGene gene : a.genes) {
       phyGene newGene = new phyGene(gene);
       genes.add(newGene);
     }
   }
-  
+
   public PVector findCenter()
   {
     // TODO!
     PVector center = new PVector(0, 0);
     return center;
   }
-  
+
   // choose which genes will be mutated based on mutationProb
   public void mutate(float mutationProb, float mutationAmount)
   {
     for (int i = 0; i < MAX_NODES; i++) {
-      if(rand.nextFloat() > 1-mutationProb)
+      if (rand.nextFloat() > 1-mutationProb)
         genes.get(i).mutate(mutationAmount);
     }
   }
@@ -51,9 +51,9 @@ public class phyGenome
   {
     Random rand = new Random();
     for (int i = 0; i < MAX_NODES; i++) {
-      if(rand.nextFloat() < mutationProb)
+      if (rand.nextFloat() < mutationProb)
         genes.get(i).mutate(mutationAmount);
-      if(rand.nextFloat() < randomizeProb)
+      if (rand.nextFloat() < randomizeProb)
         genes.get(i).randomize();
     }
   }
@@ -66,11 +66,11 @@ public class phyGenome
     int posY = 0;
     int j = 0;
     for (phyGene gene : this.genes) {
-      if(firstElem) {
+      if (firstElem) {
         gene.posX = 10;
         gene.posY = 10;
       } else {
-        if(rand.nextFloat() < 0.9) {
+        if (rand.nextFloat() < 0.9) {
           gene.posX = j*MAXDIST_X/10;
           gene.posY += 0;
         } else {
@@ -78,28 +78,28 @@ public class phyGenome
           gene.posY = rand.nextInt(MAXDIST_Y) - MAXDIST_Y/2;
         }
       }
-      
+
       gene.masValue = firstElem ? 5000 : (1 + rand.nextFloat() * 10);
       gene.K_osc = 0.006 + rand.nextFloat() * 0.0006;
       gene.Z_osc = 0.00001 + rand.nextFloat() * 0.000001;
       gene.K = 0.09 + rand.nextFloat() * 0.009;
       gene.Z = 0.0001 + rand.nextFloat() * 0.00001;
-      for(int i=0; i<MAX_CONNS; i++){
-        if(firstElem) {
+      for (int i=0; i<MAX_CONNS; i++) {
+        if (firstElem) {
           continue;
         } else {
-          if(rand.nextFloat() < 0.9) {
+          if (rand.nextFloat() < 0.9) {
             gene.conn.add("mass_"+(j-1));
           } else if (rand.nextFloat() < 0.25) {
             gene.conn.add("mass_"+rand.nextInt(j));
           }
         }
-//        if(j > 0 && rand.nextFloat() > 0.5) 
-//          gene.conn[i] = "mass_"+rand.nextInt(j);
-//        if(j > 0 && rand.nextFloat() > 0.75) 
-//          gene.conn[i] = "mass_"+(j-1);
-//        else if(rand.nextFloat() > 0.85)
-//          gene.conn[i] = "mass_0";
+        //        if(j > 0 && rand.nextFloat() > 0.5) 
+        //          gene.conn[i] = "mass_"+rand.nextInt(j);
+        //        if(j > 0 && rand.nextFloat() > 0.75) 
+        //          gene.conn[i] = "mass_"+(j-1);
+        //        else if(rand.nextFloat() > 0.85)
+        //          gene.conn[i] = "mass_0";
       }
       posX = gene.posX;
       posY = gene.posY;
