@@ -30,3 +30,8 @@ void generateMesh2(PhysicalModel mdl, double offsX, double offsY, phyGenome geno
     }
   }
 }
+
+
+
+
+float zZoom = 1;

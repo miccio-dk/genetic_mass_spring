@@ -12,6 +12,7 @@ int radius = 50;
 
 int xOffset= 500;
 int yOffset= 100;
+int generation = 0;
 
 private Object lock = new Object();
 
@@ -22,10 +23,10 @@ float percsize = 200;
 
 Minim minim;
 
-int NUM_SPECIMEN = 8;
+int NUM_SPECIMEN = 4;
 phyGenome[] genome = new phyGenome[NUM_SPECIMEN];
 PhyUGen[] simUGen = new PhyUGen[NUM_SPECIMEN];
-Gain[] gain = new Gain[NUM_SPECIMEN];
+Gain gain = new Gain();
 
 Summer sum;
 AudioOutput out;
@@ -41,8 +42,8 @@ int selModel_i;
 
 void setup()
 {
-  //size(1000, 700, P3D);
-  fullScreen(P3D,2);
+  size(800, 600, P3D);
+  //fullScreen(P3D,2);
   cam = new PeasyCam(this, 100);
   cam.setMinimumDistance(50);
   cam.setMaximumDistance(2500);
@@ -55,15 +56,16 @@ void setup()
   sum = new Summer();
   for(int i=0; i<NUM_SPECIMEN; i++) {
     // start the Gain at 0 dB, which means no change in amplitude
-    gain[i] = new Gain(0);
+    gain = new Gain(0);
     // create a physicalModel UGEN
     genome[i] = new phyGenome();
     genome[i].randomize();
-    simUGen[i] = new PhyUGen(44100, genome[i], xOffset, yOffset + spacing*i);
+    simUGen[i] = new PhyUGen(this, 44100, genome[i], xOffset, yOffset + spacing*i);
     // patch the Oscil to the output
-    simUGen[i].patch(gain[i]).patch(sum);
+    simUGen[i].patch(sum);
+    simUGen[i].createShapeArray();
   }
-  sum.patch(out);
+  sum.patch(gain).patch(out);
   
   //simUGen.mdl.triggerForceImpulse("mass"+(excitationPoint), 0, 1, 0);
   cam.setDistance(500);  // distance from looked-at point
@@ -78,22 +80,27 @@ void draw()
   selModel_i = -1;
   for(int i=0; i<NUM_SPECIMEN; i++) {
     if(isSpecimenSelected(simUGen[i], mouseX, mouseY, radius)) {
-      renderLinks(simUGen[i].mdl, 100, 255, 255);
+      simUGen[i].renderLinks(100, 255, 255);
+      simUGen[i].renderModelShapes();
       // also store currently hovered ugen for later!
       selModel_i = i;
     } else {
-      renderLinks(simUGen[i].mdl, 0, 0, 255);
+      simUGen[i].renderLinks(0, 0, 255);
+      simUGen[i].renderModelShapes();
     }
   }
+  //directionalLight(126, 126, 126, 100, 0, -1);
+  //ambientLight(182, 182, 182);
+
   popMatrix();
   
   // show infos
   fill(255);
   textSize(13); 
   text("Friction: " + fric, 100, 100, 50);
-  text("Zoom: " + zZoom, 100, 120, 50);
-  text("Last Exct: " + selModel_i + "." + selNode_name, 100, 140, 50);
-  text("Mouse: " + mouseX + " " + mouseY, 100, 200, 50);
+  text("Last Exct: " + selModel_i + "." + selNode_name, 100, 120, 50);
+  text("Mouse: " + mouseX + " " + mouseY, 100, 140, 50);
+  text("Generation " + generation, 100, 240, 50);
   
   // interaction
   // play currently hovered model
@@ -126,15 +133,18 @@ boolean isSpecimenSelected(PhyUGen ugen, int x, int y, int radius) {
 
 void newPopulation(phyGenome parent) {
   for(int i=0; i<NUM_SPECIMEN; i++) {
+    simUGen[i].unpatch(sum);
     // start the Gain at 0 dB, which means no change in amplitude
-    gain[i] = new Gain(0);
+    gain = new Gain(0);
     // create a physicalModel UGEN
-    genome[i] = parent;
+    genome[i] = new phyGenome(parent);
     genome[i].evolve(0.25, 0.02, 0.05);
-    simUGen[i] = new PhyUGen(44100, genome[i], xOffset, yOffset + spacing*i);
+    simUGen[i] = new PhyUGen(this, 44100, genome[i], xOffset, yOffset + spacing*i);
     // patch the Oscil to the output
-    simUGen[i].patch(gain[i]).patch(sum);
+    simUGen[i].patch(sum);
+    simUGen[i].createShapeArray();
   }
+  generation++;
 }
 
 
@@ -159,7 +169,7 @@ void keyPressed() {
         simUGen[i].mdl.setFriction(fric);
       }
     }
-    println(fric);
+    //println(fric);
   }
   else if (keyCode == DOWN){
     fric -= 0.00005;
@@ -167,13 +177,7 @@ void keyPressed() {
     for(int i=0; i<NUM_SPECIMEN; i++) {
       simUGen[i].mdl.setFriction(fric);
     }
-    println(fric);
-  }
-  else if (keyCode == LEFT){
-    zZoom += 0.1;
-  }
-  else if (keyCode == RIGHT){
-    zZoom -= 0.1;
+    //println(fric);
   }
 }
 

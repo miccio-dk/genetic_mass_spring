@@ -1,3 +1,4 @@
+import java.util.Arrays;
 
 // simple "gene", composed of a mass node and spring-damper-connections to other nodes
 public class phyGene
@@ -7,12 +8,27 @@ public class phyGene
   public double masValue;
   public double K_osc, Z_osc;
   public double K, Z;
-  public String[] conn;  
+  public ArrayList<String> conn;  
   
   public phyGene(String name, int conns)
   {
     this.name = name;
-    this.conn = new String[conns];
+    this.conn = new ArrayList<String>();
+  }
+  
+  public phyGene(phyGene a)
+  {
+    this.name = a.name;
+    this.posX = a.posX;
+    this.posY = a.posY;
+    this.K_osc = a.K_osc;
+    this.Z_osc = a.Z_osc;
+    this.K = a.K;
+    this.Z = a.Z;
+    this.conn = new ArrayList<String>();
+    for(String node : a.conn) {
+      this.conn.add(node);
+    }
   }
   
   public void mutate(float mutationAmount)
@@ -31,8 +47,8 @@ public class phyGene
   public void randomize()
   {
     Random rand = new Random();
-    posX = rand.nextInt(300) - 150;
-    posY = rand.nextInt(100) - 50;
+    posX = rand.nextInt(60) - 30;
+    posY = rand.nextInt(60) - 30;
     masValue = (1 + rand.nextFloat() * 10);
     K_osc = 0.006 + rand.nextFloat() * 0.0006;
     Z_osc = 0.00001 + rand.nextFloat() * 0.000001;
@@ -48,7 +64,7 @@ public class phyGene
     double min = -mutationAmount;
     double max = mutationAmount;
     double v = min + rand.nextDouble() * (max - min);
-    println("Mutation amount: " + v);
+    //println("Mutation amount: " + v);
     return value + (value*v);
   }
   
