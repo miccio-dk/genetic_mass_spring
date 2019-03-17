@@ -18,6 +18,7 @@ void renderLinks(PhysicalModel mdl, int r, int g, int b) {
       strokeWeight(2);
       stroke(r, g, b);
       // strokeWeight(mdl.getLinkDampingAt(i));
+      //println("rendering: " + i);
       drawLine(mdl.getLinkPos1At(i), mdl.getLinkPos2At(i));
       break;
     case UNDEFINED:

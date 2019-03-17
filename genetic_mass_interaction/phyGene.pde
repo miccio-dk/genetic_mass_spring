@@ -25,9 +25,9 @@ public class phyGene
     this.Z_osc = a.Z_osc;
     this.K = a.K;
     this.Z = a.Z;
-    this.conn = new ArrayList<String>();
+    this.conn = new ArrayList<String>(a.conn.size());
     for (String node : a.conn) {
-      this.conn.add(node);
+      this.conn.add(new String(node));
     }
   }
 

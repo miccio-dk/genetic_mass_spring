@@ -23,11 +23,16 @@ public class phyGenome
 
   public phyGenome(phyGenome a)
   {
-    genes = new ArrayList<phyGene>(MAX_NODES);
+    println("GENOME copy ctor!");
+    
+    // NOTE: deep copy
+    this.genes = new ArrayList<phyGene>(a.genes.size());
     for (phyGene gene : a.genes) {
-      phyGene newGene = new phyGene(gene);
-      genes.add(newGene);
+      this.genes.add(new phyGene(gene));
     }
+    
+    // NOTE: shallow copy
+    //this.genes = new ArrayList<phyGene>(a.genes);
   }
 
   public PVector findCenter()
@@ -46,7 +51,7 @@ public class phyGenome
     }
   }
 
-  // like mutate(), but with completely random gene prob
+  // like mutate(), but with potential completely random gene creation
   public void evolve(float mutationProb, float randomizeProb, float mutationAmount)
   {
     Random rand = new Random();
@@ -58,9 +63,10 @@ public class phyGenome
     }
   }
 
-  //
+  // completely random gene
   public void randomize()
   {
+    println("randomizing genome " + this);
     boolean firstElem = true;
     int posX = 0;
     int posY = 0;
@@ -94,12 +100,6 @@ public class phyGenome
             gene.conn.add("mass_"+rand.nextInt(j));
           }
         }
-        //        if(j > 0 && rand.nextFloat() > 0.5) 
-        //          gene.conn[i] = "mass_"+rand.nextInt(j);
-        //        if(j > 0 && rand.nextFloat() > 0.75) 
-        //          gene.conn[i] = "mass_"+(j-1);
-        //        else if(rand.nextFloat() > 0.85)
-        //          gene.conn[i] = "mass_0";
       }
       posX = gene.posX;
       posY = gene.posY;

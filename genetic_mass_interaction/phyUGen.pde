@@ -14,35 +14,28 @@ int maxListeningPt;
 
 public class PhyUGen extends UGen
 {
-
-  private String listeningPoint;
-
+  private int sample_rate;
   private float oneOverSampleRate;
   public int center_x;
   public int center_y;
+  private String listeningPoint;
   private phyGenome genome;
-  
-  private int sample_rate;
-
   private PhysicalModel mdl;
 
   // strat with ony one constructor for the function.
   public PhyUGen(int SR, double offsX, double offsY)
   {
     super();
-    // TODO use findCenter
+    // initialize member vars
+    this.sample_rate = SR;
     this.center_x = (int)offsX;
     this.center_y = (int)offsY;
-
-    this.sample_rate = SR;
-
-    this.genome = new phyGenome();
-
-    this.mdl = new PhysicalModel(sample_rate, displayRate);
-    mdl.setGravity(0.000);
-    mdl.setFriction(fric);
-
     listeningPoint = "mass_5";
+
+    // initialize random genome and model
+    this.genome = new phyGenome();
+    this.genome.randomize();
+    generateModel(center_x, center_y);
   }
 
   public PhysicalModel getModel() {
@@ -53,47 +46,35 @@ public class PhyUGen extends UGen
     return this.genome;
   }
 
-
-
-  void newPopulation() {
-    synchronized(lock) { 
-
-      this.genome.evolve(0.25, 0.02, 0.05);
-
-      generateModel(center_x, center_y, genome);
-
-    }
-    generation++;
+  void setGenome(phyGenome genome) {
+    this.genome = new phyGenome(genome);
+    generateModel(center_x, center_y);
   }
 
 
-  void generateModel(double offsX, double offsY, phyGenome genome) {
-    // OLD ARGS: int dimX, int dimY, String mName, String lName, double masValue, double dist, double K_osc, double Z_osc, double K, double Z
-    // add the masses to the model: name, mass, initial pos, init speed
-
+  void generateModel(double offsX, double offsY) {
     Vect3D X0, V0;
 
-    println("Model object : " + this.mdl);
-
     synchronized(lock) {
-
       this.mdl =  new PhysicalModel(sample_rate, displayRate);
-    mdl.setGravity(0.000);
-    mdl.setFriction(fric);
+      mdl.setGravity(0.000);
+      mdl.setFriction(fric);
+      println("Model object : " + this.mdl);
+      println("Genome object : " + this.genome);
       
       // add masses
-      for (phyGene gene : genome.genes) {
-        println("generating mass: " + gene.name);
+      for (phyGene gene : this.genome.genes) {
+        //println("generating mass: " + gene.name);
         X0 = new Vect3D(gene.posX+offsX, gene.posY+offsY, 0.0);
         V0 = new Vect3D(0., 0., 0.);
         this.mdl.addOsc1D(gene.name, gene.masValue, gene.K_osc, gene.Z_osc, X0, V0);
       }
 
       // add springs
-      for (phyGene gene : genome.genes) {
+      for (phyGene gene : this.genome.genes) {
         for (String node2 : gene.conn) {
           if (node2 != null) {
-            println("generating spring: " + gene.name + " " + node2);
+            //println("generating spring: " + gene.name + " " + node2);
             this.mdl.addSpringDamper1D(gene.name, 0, gene.K, gene.Z, gene.name, node2);
           }
         }

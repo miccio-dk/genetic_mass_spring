@@ -22,15 +22,11 @@ PeasyCam cam;
 float percsize = 200;
 
 Minim minim;
-
-int NUM_SPECIMEN = 4;
-
-
-PhyUGen[] simUGen = new PhyUGen[NUM_SPECIMEN];
 Gain gain = new Gain();
-
 Summer sum;
 AudioOutput out;
+int NUM_SPECIMEN = 4;
+PhyUGen[] simUGen = new PhyUGen[NUM_SPECIMEN];
 
 float speed = 0;
 float pos = 100;
@@ -39,45 +35,31 @@ String selNode_name;
 int selModel_i;
 
 
-///////////////////////////////////////
-
 void setup()
-{
-  size(800, 600, P3D);
-  //fullScreen(P3D,2);
-  
+{  
+  // setup screen camera
+  size(800, 600, P3D);   // or fullScreen(P3D,2);
   cam = new PeasyCam(this, 100);
   cam.setMinimumDistance(50);
   cam.setMaximumDistance(2500);
 
+  // setup audio lines
   minim = new Minim(this);
-
-  // use the getLineOut method of the Minim object to get an AudioOutput object
   out = minim.getLineOut();
-
-
   sum = new Summer();
-  for (int i=0; i<NUM_SPECIMEN; i++) {
-    
-    simUGen[i] = new PhyUGen(44100, xOffset, yOffset + spacing*i);
 
+  // spawn initial population
+  for (int i=0; i<NUM_SPECIMEN; i++) {
+    simUGen[i] = new PhyUGen(44100, xOffset, yOffset + spacing*i);
     // start the Gain at 0 dB, which means no change in amplitude
     gain = new Gain(0);
-    // create a physicalModel UGEN
-    // patch the Oscil to the output
-    simUGen[i].patch(sum);
-    
-    // JL: now create the initial models inside the UGens
-
-    simUGen[i].getGenome().randomize();
-    simUGen[i].newPopulation();
-
+    simUGen[i].patch(sum);    
   }
   
   sum.patch(gain).patch(out);
-
-  cam.setDistance(500);  // distance from looked-at point
+  cam.setDistance(500);
 }
+
 
 void draw()
 {
@@ -85,16 +67,13 @@ void draw()
   camera(width/2.0, height/2.0, (height/2.0) / tan(PI*30.0 / 180.0), width/2, height/2.0, 0, 0, 1, 0);
   background(0);
   pushMatrix();
+    
   selModel_i = -1;
-  
-  
-  // JL: for some reason the mass rendering isn't working, haven't figured out why yet
-  
   synchronized(lock) { 
     for (int i=0; i<NUM_SPECIMEN; i++) {
       if (isSpecimenSelected(simUGen[i], mouseX, mouseY, radius)) {
         renderLinks(simUGen[i].getModel(), 100, 255, 255);
-        renderModelMasses(simUGen[i].getModel());
+        //renderModelMasses(simUGen[i].getModel());
         // also store currently hovered ugen for later!
         selModel_i = i;
       } else {
@@ -143,15 +122,19 @@ boolean isSpecimenSelected(PhyUGen ugen, int x, int y, int radius) {
 }
 
 
-
-
-
 void mouseReleased() {
   if (selModel_i >= 0) {
-    simUGen[selModel_i].newPopulation();
+    phyGenome genome = simUGen[selModel_i].getGenome();
+    for (int i=0; i<NUM_SPECIMEN; i++) {
+      if(selModel_i != i) {
+        // println("replacing specimen " + i);
+        simUGen[i].setGenome(simUGen[selModel_i].getGenome());
+        // mutate/evolve
+      }
+    }
+    generation++;
   }
 }
-
 
 
 void keyPressed() {
@@ -177,6 +160,7 @@ void keyPressed() {
     //println(fric);
   }
 }
+
 
 void keyReleased() {
   if (key == ' ') {
