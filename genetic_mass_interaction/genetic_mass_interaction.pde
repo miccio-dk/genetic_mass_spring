@@ -7,13 +7,20 @@ int displayRate = 60;
 
 int mouseDragged = 0;
 
+Minim minim;
+Gain gain = new Gain();
+Summer sum;
+AudioOutput out;
+int NUM_SPECIMEN = 36;
+PhyUGen[] simUGen = new PhyUGen[NUM_SPECIMEN];
+
 int maxRows = 6;
-float spacingX = 100;
-float spacingY = 200;
-int xOffset= 100;
-int yOffset= 100;
-int radiusX = 100;
-int radiusY = 20;
+float spacingX = 150;
+float spacingY = 120;
+int xOffset= 20;
+int yOffset= 60;
+int radiusX = 150;
+int radiusY = 75;
 
 private Object lock = new Object();
 float currAudio = 0;
@@ -23,13 +30,6 @@ int generation = 0;
 PeasyCam cam;
  
 float percsize = 200;
-
-Minim minim;
-Gain gain = new Gain();
-Summer sum;
-AudioOutput out;
-int NUM_SPECIMEN = 24;
-PhyUGen[] simUGen = new PhyUGen[NUM_SPECIMEN];
 
 float speed = 0;
 float pos = 100;
@@ -53,7 +53,7 @@ void setup()
 
   // spawn initial population
   for (int i=0; i<NUM_SPECIMEN; i++) {
-    simUGen[i] = new PhyUGen(44100, xOffset + spacingY*(i/maxRows), yOffset + spacingX*(i%maxRows));
+    simUGen[i] = new PhyUGen(44100, xOffset + spacingX*(i/maxRows), yOffset + spacingY*(i%maxRows));
     // start the Gain at 0 dB, which means no change in amplitude
     gain = new Gain(0);
     simUGen[i].patch(sum);    
@@ -91,13 +91,14 @@ void draw()
   popMatrix();
 
   // show infos
-  fill(255);
+  fill(255, 255, 255, 150);
   textSize(13); 
-  text("Friction: " + fric, 100, 100, 50);
-  text("Last Exct: " + selModel_i + "." + selNode_name, 100, 120, 50);
-  text("Mouse: " + mouseX + " " + mouseY, 100, 140, 50);
-  text("Last sample " + currAudio, 100, 160, 50);
-  text("Generation " + generation, 100, 240, 50);
+  text("Friction: " + fric, 50, 40, 50);
+  text("Last Exct: " + selModel_i + "." + selNode_name, 50, 60, 50);
+  text("Mouse: " + mouseX + "  " + mouseY, 400, 40, 50);
+  
+  text("Generation " + generation, 700, 40, 50);
+  text("Last sample " + currAudio, 700, 60, 50);
 
 
   // interaction
@@ -142,8 +143,8 @@ void mouseReleased() {
         // mutate/evolve
         simUGen[i].getGenome().mutate(mutationProb, mutationAmount);
         //simUGen[i].generateModel(xOffset + spacingY*(i/maxRows), yOffset + spacingX*(i%maxRows));
-        mutationProb += 0.035;
-        mutationAmount += 0.0075;
+        mutationProb += 0.035/2;
+        mutationAmount += 0.0075/2;
       //}
     }
 
