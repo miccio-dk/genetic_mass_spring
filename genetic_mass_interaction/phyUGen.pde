@@ -7,7 +7,7 @@ import shapes3d.*;
 
 import miPhysics.*;
 
-float fric = 0.00001;
+float fric = 0.0001;
 
 
 int maxListeningPt;
@@ -47,7 +47,7 @@ public class PhyUGen extends UGen
   }
 
   void setGenome(phyGenome genome) {
-    this.genome = new phyGenome(genome);
+    this.genome = genome;
     generateModel(center_x, center_y);
   }
 
@@ -109,6 +109,8 @@ public class PhyUGen extends UGen
         sample = 0;
       }
       Arrays.fill(channels, sample);
+      currAudio = sample;
     }
   }
+  
 }

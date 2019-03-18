@@ -18,6 +18,10 @@ public class phyGene
 
   public phyGene(phyGene a)
   {
+    
+    this.name = a.name;
+    this.conn = new ArrayList<String>();
+    /*
     this.name = a.name;
     this.posX = a.posX;
     this.posY = a.posY;
@@ -29,12 +33,14 @@ public class phyGene
     for (String node : a.conn) {
       this.conn.add(new String(node));
     }
+    */
+    
   }
 
   public void mutate(float mutationAmount)
   {
-    posX = (int)randomizeValue(posX, mutationAmount);
-    posY = (int)randomizeValue(posY, mutationAmount);
+    posX = (int)randomizeValuePos(posX, mutationAmount, 50);
+    posY = (int)randomizeValuePos(posY, mutationAmount, 50);
 
     masValue = randomizeValue(masValue, mutationAmount);
     K_osc = randomizeValue(K_osc, mutationAmount);
@@ -65,6 +71,20 @@ public class phyGene
     double max = mutationAmount;
     double v = min + rand.nextDouble() * (max - min);
     //println("Mutation amount: " + v);
-    return value + (value*v);
+    double newValue = value + (value*v);
+    println("@@ old value: " + value + ", new value: " + newValue);
+    return newValue;
+  }
+  
+  private double randomizeValuePos(double value, float mutationAmount, float maxDist)
+  {
+    Random rand = new Random();
+    double min = -mutationAmount;
+    double max = mutationAmount;
+    double v = min + rand.nextDouble() * (max - min);
+    //println("Mutation amount: " + v);
+    double newValue = value + (maxDist*v);
+    println("@@ old value: " + value + ", new value: " + newValue);
+    return newValue;
   }
 }

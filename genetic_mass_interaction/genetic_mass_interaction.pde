@@ -7,25 +7,27 @@ int displayRate = 60;
 
 int mouseDragged = 0;
 
-float spacing = 100;
-int radius = 50;
-
-int xOffset= 500;
+int maxRows = 6;
+float spacingX = 100;
+float spacingY = 200;
+int xOffset= 100;
 int yOffset= 100;
-int generation = 0;
+int radius = 20;
 
 private Object lock = new Object();
+float currAudio = 0;
+int generation = 0;
 
 
 PeasyCam cam;
-
+ 
 float percsize = 200;
 
 Minim minim;
 Gain gain = new Gain();
 Summer sum;
 AudioOutput out;
-int NUM_SPECIMEN = 4;
+int NUM_SPECIMEN = 24;
 PhyUGen[] simUGen = new PhyUGen[NUM_SPECIMEN];
 
 float speed = 0;
@@ -38,7 +40,7 @@ int selModel_i;
 void setup()
 {  
   // setup screen camera
-  size(800, 600, P3D);   // or fullScreen(P3D,2);
+  size(900, 700, P3D);   // or fullScreen(P3D,2);
   cam = new PeasyCam(this, 100);
   cam.setMinimumDistance(50);
   cam.setMaximumDistance(2500);
@@ -50,7 +52,7 @@ void setup()
 
   // spawn initial population
   for (int i=0; i<NUM_SPECIMEN; i++) {
-    simUGen[i] = new PhyUGen(44100, xOffset, yOffset + spacing*i);
+    simUGen[i] = new PhyUGen(44100, xOffset + spacingY*(i/maxRows), yOffset + spacingX*(i%maxRows));
     // start the Gain at 0 dB, which means no change in amplitude
     gain = new Gain(0);
     simUGen[i].patch(sum);    
@@ -58,6 +60,8 @@ void setup()
   
   sum.patch(gain).patch(out);
   cam.setDistance(500);
+  minim.debugOn();
+  sum.printInputs();
 }
 
 
@@ -71,7 +75,7 @@ void draw()
   selModel_i = -1;
   synchronized(lock) { 
     for (int i=0; i<NUM_SPECIMEN; i++) {
-      if (isSpecimenSelected(simUGen[i], mouseX, mouseY, radius)) {
+      if (isSpecimenSelected(simUGen[i], mouseX, mouseY, radius*8, radius)) {
         renderLinks(simUGen[i].getModel(), 100, 255, 255);
         //renderModelMasses(simUGen[i].getModel());
         // also store currently hovered ugen for later!
@@ -91,7 +95,9 @@ void draw()
   text("Friction: " + fric, 100, 100, 50);
   text("Last Exct: " + selModel_i + "." + selNode_name, 100, 120, 50);
   text("Mouse: " + mouseX + " " + mouseY, 100, 140, 50);
+  text("Last sample " + currAudio, 100, 160, 50);
   text("Generation " + generation, 100, 240, 50);
+
 
   // interaction
   // play currently hovered model
@@ -101,38 +107,46 @@ void draw()
 
 // excite (play)) model
 void engrave(float mX, float mY) {
-  String matName = "mass_" + int((mX - xOffset) / 4);
+  String matName = "mass_" + int(mX%(spacingX) / 4);
   // println("exciting " + selModel_i + "." + matName);
+  selNode_name = matName;
   if (selModel_i >= 0) {
     if (simUGen[selModel_i].mdl.matExists(matName)) {
-      selNode_name = matName;
       simUGen[selModel_i].mdl.triggerForceImpulse(matName, 0., 0., 15.);
     }
   }
 }
 
 
-boolean isSpecimenSelected(PhyUGen ugen, int x, int y, int radius) {
-  if (ugen.center_x-radius < x)
-    if (ugen.center_x+radius > x)
-      if (ugen.center_y-radius < y)
-        if (ugen.center_y+radius > y)
+boolean isSpecimenSelected(PhyUGen ugen, int x, int y, int radiusX, int radiusY) {
+  if (ugen.center_x < x)
+    if (ugen.center_x+radiusX > x)
+      if (ugen.center_y-radiusY < y)
+        if (ugen.center_y+radiusY > y)
           return true;
   return false;
 }
 
 
 void mouseReleased() {
+  float mutationProb = 0.1;
+  float mutationAmount = 0.01;
   if (selModel_i >= 0) {
     phyGenome genome = simUGen[selModel_i].getGenome();
     for (int i=0; i<NUM_SPECIMEN; i++) {
       if(selModel_i != i) {
         // println("replacing specimen " + i);
-        simUGen[i].setGenome(simUGen[selModel_i].getGenome());
+        simUGen[i].setGenome(new phyGenome(simUGen[selModel_i].getGenome()));
         // mutate/evolve
+        simUGen[i].getGenome().mutate(mutationProb, mutationAmount);
+        simUGen[i].generateModel(xOffset + spacingY*(i/maxRows), yOffset + spacingX*(i%maxRows));
+        mutationProb += 0.03;
+        mutationAmount += 0.005;
+        
       }
     }
     generation++;
+    sum.printInputs();
   }
 }
 
