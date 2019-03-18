@@ -47,7 +47,8 @@ public class PhyUGen extends UGen
   }
 
   void setGenome(phyGenome genome) {
-    this.genome = genome;
+    println("### input genome: " + genome);
+    this.genome = new phyGenome(genome);
     generateModel(center_x, center_y);
   }
 
@@ -56,7 +57,7 @@ public class PhyUGen extends UGen
     Vect3D X0, V0;
 
     synchronized(lock) {
-      this.mdl =  new PhysicalModel(sample_rate, displayRate);
+      this.mdl =  new PhysicalModel(sample_rate, displayRate, paramSystem.ALGO_UNITS);
       mdl.setGravity(0.000);
       mdl.setFriction(fric);
       println("Model object : " + this.mdl);

@@ -72,7 +72,7 @@ public class phyGene
     double v = min + rand.nextDouble() * (max - min);
     //println("Mutation amount: " + v);
     double newValue = value + (value*v);
-    println("@@ old value: " + value + ", new value: " + newValue);
+    //println("@@ old value: " + value + ", new value: " + newValue);
     return newValue;
   }
   
@@ -84,7 +84,7 @@ public class phyGene
     double v = min + rand.nextDouble() * (max - min);
     //println("Mutation amount: " + v);
     double newValue = value + (maxDist*v);
-    println("@@ old value: " + value + ", new value: " + newValue);
+    //println("@@ old value: " + value + ", new value: " + newValue);
     return newValue;
   }
 }

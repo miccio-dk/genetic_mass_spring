@@ -2,8 +2,8 @@ import java.util.Arrays; //<>//
 import java.util.Random;
 
 
-int MAX_NODES = 30;
-int MAX_CONNS = 3;
+int MAX_NODES = 14;
+int MAX_CONNS = 7;
 
 int MAXDIST_X = 60;
 int MAXDIST_Y = 30;
@@ -23,15 +23,13 @@ public class phyGenome
 
   public phyGenome(phyGenome a)
   {
-    println("GENOME copy ctor!");
-    // NOTE: deep copy //<>//
+    //println("GENOME copy ctor!");
     this.genes = new ArrayList<phyGene>(a.genes.size());
     for (phyGene gene : a.genes) {
-      this.genes.add(new phyGene(gene));
+      // NOTE: deep vs shallow copy of genes
+      //this.genes.add(new phyGene(gene));
+      this.genes.add(gene);
     }
-    
-    // NOTE: shallow copy
-    this.genes = new ArrayList<phyGene>(a.genes);
   }
 
   public PVector findCenter()
@@ -77,7 +75,7 @@ public class phyGenome
       } else {
         if (rand.nextFloat() < 0.9) {
           gene.posX = j*MAXDIST_X/10;
-          gene.posY += 0;
+          gene.posY += rand.nextInt(10)-5;
         } else {
           gene.posX = rand.nextInt(MAXDIST_X) - MAXDIST_X/2;
           gene.posY = rand.nextInt(MAXDIST_Y) - MAXDIST_Y/2;

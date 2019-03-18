@@ -12,7 +12,8 @@ float spacingX = 100;
 float spacingY = 200;
 int xOffset= 100;
 int yOffset= 100;
-int radius = 20;
+int radiusX = 100;
+int radiusY = 20;
 
 private Object lock = new Object();
 float currAudio = 0;
@@ -60,7 +61,7 @@ void setup()
   
   sum.patch(gain).patch(out);
   cam.setDistance(500);
-  minim.debugOn();
+  //minim.debugOn();
   sum.printInputs();
 }
 
@@ -75,7 +76,7 @@ void draw()
   selModel_i = -1;
   synchronized(lock) { 
     for (int i=0; i<NUM_SPECIMEN; i++) {
-      if (isSpecimenSelected(simUGen[i], mouseX, mouseY, radius*8, radius)) {
+      if (isSpecimenSelected(simUGen[i], mouseX, mouseY, radiusX, radiusY)) {
         renderLinks(simUGen[i].getModel(), 100, 255, 255);
         //renderModelMasses(simUGen[i].getModel());
         // also store currently hovered ugen for later!
@@ -129,23 +130,25 @@ boolean isSpecimenSelected(PhyUGen ugen, int x, int y, int radiusX, int radiusY)
 
 
 void mouseReleased() {
-  float mutationProb = 0.1;
-  float mutationAmount = 0.01;
+  float mutationProb = 0;
+  float mutationAmount = 0;
   if (selModel_i >= 0) {
-    phyGenome genome = simUGen[selModel_i].getGenome();
+    phyGenome genome = new phyGenome(simUGen[selModel_i].getGenome());
+    println("#### parent genome # " + selModel_i + ": " + genome ); //<>//
     for (int i=0; i<NUM_SPECIMEN; i++) {
-      if(selModel_i != i) {
+      //if(selModel_i != i) {
         // println("replacing specimen " + i);
-        simUGen[i].setGenome(new phyGenome(simUGen[selModel_i].getGenome()));
+        simUGen[i].setGenome(genome);
         // mutate/evolve
         simUGen[i].getGenome().mutate(mutationProb, mutationAmount);
-        simUGen[i].generateModel(xOffset + spacingY*(i/maxRows), yOffset + spacingX*(i%maxRows));
-        mutationProb += 0.03;
-        mutationAmount += 0.005;
-        
-      }
+        //simUGen[i].generateModel(xOffset + spacingY*(i/maxRows), yOffset + spacingX*(i%maxRows));
+        mutationProb += 0.035;
+        mutationAmount += 0.0075;
+      //}
     }
+
     generation++;
+    println("\n\nGeneration: " + generation + "\n\n");
     sum.printInputs();
   }
 }
