@@ -109,7 +109,7 @@ void draw()
 
 // excite (play)) model
 void engrave(float mX, float mY) {
-  String matName = "mass_" + int(mX%(spacingX) / 4);
+  String matName = "mass_" + int(mX%(spacingX) / 16);
   // println("exciting " + selModel_i + "." + matName);
   selNode_name = matName;
   if (selModel_i >= 0) {

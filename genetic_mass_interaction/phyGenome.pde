@@ -82,7 +82,7 @@ public class phyGenome
         }
       }
 
-      gene.masValue = firstElem ? 5000 : (1 + rand.nextFloat() * 40);
+      gene.masValue = firstElem ? 5000 : (1 + rand.nextFloat() * 50);
       gene.K_osc = 0.006 + rand.nextFloat() * 0.0006;
       gene.Z_osc = 0.00001 + rand.nextFloat() * 0.000001;
       gene.K = 0.09 + rand.nextFloat() * 0.009;
