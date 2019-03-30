@@ -27,8 +27,8 @@ public class phyGenome
     this.genes = new ArrayList<phyGene>(a.genes.size());
     for (phyGene gene : a.genes) {
       // NOTE: deep vs shallow copy of genes
-      //this.genes.add(new phyGene(gene));
-      this.genes.add(gene);
+      this.genes.add(new phyGene(gene));
+      //this.genes.add(gene);
     }
   }
 

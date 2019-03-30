@@ -18,13 +18,12 @@ public class phyGene
 
   public phyGene(phyGene a)
   {
-    
     this.name = a.name;
     this.conn = new ArrayList<String>();
-    /*
     this.name = a.name;
     this.posX = a.posX;
     this.posY = a.posY;
+    this.masValue = a.masValue;
     this.K_osc = a.K_osc;
     this.Z_osc = a.Z_osc;
     this.K = a.K;
@@ -33,8 +32,6 @@ public class phyGene
     for (String node : a.conn) {
       this.conn.add(new String(node));
     }
-    */
-    
   }
 
   public void mutate(float mutationAmount)

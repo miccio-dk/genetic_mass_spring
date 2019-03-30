@@ -1,5 +1,5 @@
 PApplet app;
-float zZoom = 1;
+float zZoom = 3;
 
 
 void drawLine(Vect3D pos1, Vect3D pos2) {
@@ -17,7 +17,9 @@ void renderLinks(PhysicalModel mdl, int r, int g, int b) {
     case SpringDamper1D:
       strokeWeight(2);
       stroke(r, g, b);
-      // strokeWeight(mdl.getLinkDampingAt(i));
+      float thickness = (float)Math.log((mdl.getLinkDampingAt(i) - 0.0001) * 100000);
+      thickness = 1.5 + ((thickness > 0) ? thickness : 0);
+      strokeWeight(thickness);
       //println("rendering: " + i);
       drawLine(mdl.getLinkPos1At(i), mdl.getLinkPos2At(i));
       break;

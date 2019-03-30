@@ -16,8 +16,8 @@ public class PhyUGen extends UGen
 {
   private int sample_rate;
   private float oneOverSampleRate;
-  public int center_x;
-  public int center_y;
+  public int offsX;
+  public int offsY;
   private String listeningPoint;
   private phyGenome genome;
   private PhysicalModel mdl;
@@ -28,32 +28,32 @@ public class PhyUGen extends UGen
     super();
     // initialize member vars
     this.sample_rate = SR;
-    this.center_x = (int)offsX;
-    this.center_y = (int)offsY;
+    this.offsX = (int)offsX;
+    this.offsY = (int)offsY;
     listeningPoint = "mass_5";
 
     // initialize random genome and model
     this.genome = new phyGenome();
     this.genome.randomize();
-    generateModel(center_x, center_y);
+    generateModel();
   }
 
   public PhysicalModel getModel() {
     return this.mdl;
   }
 
-  phyGenome getGenome() {
+  public phyGenome getGenome() {
     return this.genome;
   }
 
-  void setGenome(phyGenome genome) {
+  public void setGenome(phyGenome genome) {
     println("### input genome: " + genome);
     this.genome = new phyGenome(genome);
-    generateModel(center_x, center_y);
+    generateModel();
   }
 
 
-  void generateModel(double offsX, double offsY) {
+  public void generateModel() {
     Vect3D X0, V0;
 
     synchronized(lock) {
@@ -66,7 +66,7 @@ public class PhyUGen extends UGen
       // add masses
       for (phyGene gene : this.genome.genes) {
         //println("generating mass: " + gene.name);
-        X0 = new Vect3D(gene.posX+offsX, gene.posY+offsY, 0.0);
+        X0 = new Vect3D(gene.posX+this.offsX, gene.posY+this.offsY, 0.0);
         V0 = new Vect3D(0., 0., 0.);
         this.mdl.addOsc1D(gene.name, gene.masValue, gene.K_osc, gene.Z_osc, X0, V0);
       }
@@ -80,7 +80,6 @@ public class PhyUGen extends UGen
           }
         }
       }
-
       this.mdl.init();
     }
   }
@@ -95,6 +94,7 @@ public class PhyUGen extends UGen
     oneOverSampleRate = 1 / sampleRate();
     this.mdl.setSimRate((int)sampleRate());
   }
+  
 
   @Override
     protected void uGenerate(float[] channels)
@@ -106,6 +106,9 @@ public class PhyUGen extends UGen
       // calculate the sample value
       if (this.mdl.matExists(listeningPoint)) {
         sample =(float)(this.mdl.getMatPosition(listeningPoint).z * 0.001);
+        if(Float.isNaN(sample)) {
+          println("NAN!!");  //<>//
+        }
       } else {
         sample = 0;
       }

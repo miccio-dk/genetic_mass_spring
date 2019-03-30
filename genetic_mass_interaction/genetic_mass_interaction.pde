@@ -36,6 +36,9 @@ float pos = 100;
 
 String selNode_name;
 int selModel_i;
+float force = 0;
+float mutationProb = 0;
+float mutationAmount = 0;
 
 
 void setup()
@@ -77,12 +80,12 @@ void draw()
   synchronized(lock) { 
     for (int i=0; i<NUM_SPECIMEN; i++) {
       if (isSpecimenSelected(simUGen[i], mouseX, mouseY, radiusX, radiusY)) {
-        renderLinks(simUGen[i].getModel(), 100, 255, 255);
+        renderLinks(simUGen[i].getModel(), 250, 164, 164);
         //renderModelMasses(simUGen[i].getModel());
         // also store currently hovered ugen for later!
         selModel_i = i;
       } else {
-        renderLinks(simUGen[i].getModel(), 0, 0, 255);
+        renderLinks(simUGen[i].getModel(), 28, 164, 250);
         //renderModelMasses(simUGen[i].getModel());
       }
     }
@@ -91,15 +94,18 @@ void draw()
   popMatrix();
 
   // show infos
-  fill(255, 255, 255, 150);
+  fill(255, 255, 255, 200);
   textSize(13); 
-  text("Friction: " + fric, 50, 40, 50);
-  text("Last Exct: " + selModel_i + "." + selNode_name, 50, 60, 50);
-  text("Mouse: " + mouseX + "  " + mouseY, 400, 40, 50);
-  
-  text("Generation " + generation, 700, 40, 50);
-  text("Last sample " + currAudio, 700, 60, 50);
+  text("Friction: " + fric, 50, 50, 50);
+  text("Last Exct: " + selModel_i + "." + selNode_name, 50, 70, 50);
+  text("Force: " + force, 50, 90, 50);
 
+  text(" " + mouseX + "  " + mouseY, 400, 50, 50);
+  
+  text("Generation " + generation, 700, 50, 50);  
+  text("Last sample " + Math.abs(currAudio), 700, 70, 50);
+
+  text("Max mutation " + mutationProb + "  " + mutationAmount, 50, height-40, 50);
 
   // interaction
   // play currently hovered model
@@ -110,41 +116,43 @@ void draw()
 // excite (play)) model
 void engrave(float mX, float mY) {
   String matName = "mass_" + int(mX%(spacingX) / 16);
+  float curr_force = (float)(mY%(spacingY) / 5);
   // println("exciting " + selModel_i + "." + matName);
   selNode_name = matName;
   if (selModel_i >= 0) {
     if (simUGen[selModel_i].mdl.matExists(matName)) {
-      simUGen[selModel_i].mdl.triggerForceImpulse(matName, 0., 0., 15.);
+      simUGen[selModel_i].mdl.triggerForceImpulse(matName, 0., 0., curr_force);
+      force = curr_force;
     }
   }
 }
 
 
 boolean isSpecimenSelected(PhyUGen ugen, int x, int y, int radiusX, int radiusY) {
-  if (ugen.center_x < x)
-    if (ugen.center_x+radiusX > x)
-      if (ugen.center_y-radiusY < y)
-        if (ugen.center_y+radiusY > y)
+  if (ugen.offsX < x)
+    if (ugen.offsX+radiusX > x)
+      if (ugen.offsY-radiusY < y)
+        if (ugen.offsY+radiusY > y)
           return true;
   return false;
 }
 
 
 void mouseReleased() {
-  float mutationProb = 0;
-  float mutationAmount = 0;
+  mutationProb = 0;
+  mutationAmount = 0;
   if (selModel_i >= 0) {
     phyGenome genome = new phyGenome(simUGen[selModel_i].getGenome());
-    println("#### parent genome # " + selModel_i + ": " + genome ); //<>//
+    println("#### parent genome # " + selModel_i + ": " + genome );
     for (int i=0; i<NUM_SPECIMEN; i++) {
       //if(selModel_i != i) {
         // println("replacing specimen " + i);
         simUGen[i].setGenome(genome);
         // mutate/evolve
         simUGen[i].getGenome().mutate(mutationProb, mutationAmount);
-        //simUGen[i].generateModel(xOffset + spacingY*(i/maxRows), yOffset + spacingX*(i%maxRows));
-        mutationProb += 0.035/2;
-        mutationAmount += 0.0075/2;
+        simUGen[i].generateModel();
+        mutationProb += 0.025 * (1 + (float)generation/10);
+        mutationAmount += 0.005 * (1 + (float)generation/10);
       //}
     }
 
