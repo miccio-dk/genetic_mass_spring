@@ -7,7 +7,7 @@ import shapes3d.*;
 
 import miPhysics.*;
 
-float fric = 0.0001;
+float fric = 0.0003;
 
 
 int maxListeningPt;
@@ -47,7 +47,7 @@ public class PhyUGen extends UGen
   }
 
   public void setGenome(phyGenome genome) {
-    println("### input genome: " + genome);
+    //println("### input genome: " + genome);
     this.genome = new phyGenome(genome);
     generateModel();
   }
@@ -60,8 +60,8 @@ public class PhyUGen extends UGen
       this.mdl =  new PhysicalModel(sample_rate, displayRate, paramSystem.ALGO_UNITS);
       mdl.setGravity(0.000);
       mdl.setFriction(fric);
-      println("Model object : " + this.mdl);
-      println("Genome object : " + this.genome);
+      //println("Model object : " + this.mdl);
+      //println("Genome object : " + this.genome);
       
       // add masses
       for (phyGene gene : this.genome.genes) {
@@ -107,7 +107,8 @@ public class PhyUGen extends UGen
       if (this.mdl.matExists(listeningPoint)) {
         sample =(float)(this.mdl.getMatPosition(listeningPoint).z * 0.001);
         if(Float.isNaN(sample)) {
-          println("NAN!!");  //<>//
+          //println("NAN!!");  //<>//
+          sample = 0;
         }
       } else {
         sample = 0;

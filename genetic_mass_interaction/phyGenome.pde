@@ -3,7 +3,7 @@ import java.util.Random;
 
 
 int MAX_NODES = 8;
-int MAX_CONNS = 7;
+int MAX_CONNS = 6;
 
 int MAXDIST_X = 140;
 int MAXDIST_Y = 100;
@@ -63,7 +63,7 @@ public class phyGenome
   // completely random gene
   public void randomize()
   {
-    println("randomizing genome " + this);
+    //println("randomizing genome " + this);
     boolean firstElem = true;
     int posX = 0;
     int posY = 0;
@@ -83,8 +83,8 @@ public class phyGenome
       }
 
       gene.masValue = firstElem ? 5000 : (1 + rand.nextFloat() * 50);
-      gene.K_osc = 0.006 + rand.nextFloat() * 0.0006;
-      gene.Z_osc = 0.00001 + rand.nextFloat() * 0.000001;
+      gene.K_osc = 0.0062 + rand.nextFloat() * 0.0006;
+      gene.Z_osc = 0.000012 + rand.nextFloat() * 0.000001;
       gene.K = 0.09 + rand.nextFloat() * 0.009;
       gene.Z = 0.0001 + rand.nextFloat() * 0.00001;
       for (int i=0; i<MAX_CONNS; i++) {
